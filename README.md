@@ -89,4 +89,4 @@ The kitty color theme is left in place. Delete the `BEGIN_KITTY_THEME` block in 
 - **GTK theming.** Plasma's appearance settings can overwrite shared GTK theme files. If Omarchy apps change color after you tweak Plasma, re-pick your theme from the Omarchy menu.
 - Tested on Omarchy 4.0.6, Plasma 6.8 and kitty 0.49.
 
-See [docs/manual-setup.md](docs/manual-setup.md) for the step-by-step manual version and the reasoning behind each change.
+See [docs/manual-setup.md](docs/manual-setup.md) for the step-by-step manual version and the reasoning behind each change, and [CHANGELOG.md](CHANGELOG.md) for what changed in each version and the issues fixed along the way.

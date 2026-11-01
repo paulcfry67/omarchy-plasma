@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-VERSION="1.0.0"
+VERSION="1.1.0"
 
 # ---------- defaults ----------
 FULL=0
@@ -28,8 +28,8 @@ DO_BTOP=1
 DO_SNAPSHOT=1
 DRY_RUN=0
 
-LEAN_PKGS=(plasma-desktop konsole dolphin kscreen plasma-nm plasma-pa kde-gtk-config breeze breeze-gtk)
-FULL_PKGS=(plasma-meta konsole dolphin)
+LEAN_PKGS=(plasma-desktop konsole dolphin kscreen plasma-nm plasma-pa kde-gtk-config breeze breeze-gtk kitty)
+FULL_PKGS=(plasma-meta konsole dolphin kitty)
 
 SDDM_OVERRIDE="/etc/sddm.conf.d/zz-local.conf"
 KITTY_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
@@ -45,6 +45,8 @@ else
 fi
 step() { printf '\n%s==> %s%s\n' "$BOLD" "$*" "$RESET"; }
 ok()   { printf '  %s✓%s %s\n' "$GREEN" "$RESET" "$*"; }
+# did: report a change; in dry-run mode, say it *would* happen instead.
+did()  { if (( DRY_RUN )); then printf '  %s~%s would: %s\n' "$YELLOW" "$RESET" "$*"; else ok "$@"; fi; }
 warn() { printf '  %s!%s %s\n' "$YELLOW" "$RESET" "$*"; }
 die()  { printf '%sError:%s %s\n' "$RED" "$RESET" "$*" >&2; exit 1; }
 
@@ -116,7 +118,7 @@ if (( ! DO_SNAPSHOT )); then
   warn "Skipped (--no-snapshot)"
 elif command -v snapper >/dev/null; then
   if run sudo snapper create -d "before omarchy-plasma"; then
-    ok "Snapshot \"before omarchy-plasma\" created"
+    did "Snapshot \"before omarchy-plasma\" created"
   else
     warn "snapper failed; continuing without a snapshot"
   fi
@@ -136,7 +138,7 @@ else
   echo "  If pacman asks about conflicts or replacements, read the prompt before answering."
   # stdin from /dev/tty so pacman's prompts work even when piped from curl
   run sudo pacman -S --needed "${MISSING[@]}" < "$TTY_IN"
-  ok "Packages installed"
+  did "Packages installed"
 fi
 
 # ---------- 3. SDDM session picker ----------
@@ -159,7 +161,7 @@ write_root_file "$SDDM_OVERRIDE" <<EOF
 User=
 ${THEME_LINES}
 EOF
-ok "Auto-login off; pick Plasma (Wayland) or Omarchy at the login screen"
+did "Auto-login off; pick Plasma (Wayland) or Omarchy at the login screen"
 
 # ---------- 4. kitty decorations and size (Plasma only) ----------
 step "4/6 Kitty window settings for Plasma"
@@ -172,7 +174,7 @@ else
   else
     printf '\n# Per-desktop overrides (added by omarchy-plasma)\n%s\n' "$INCLUDE_LINE" >> "$KITTY_DIR/kitty.conf"
   fi
-  ok "Added per-desktop include to kitty.conf"
+  did "Added per-desktop include to kitty.conf"
 fi
 if (( DRY_RUN )); then
   echo "  [dry-run] write $KITTY_DIR/KDE.conf and touch $KITTY_DIR/Hyprland.conf"
@@ -187,7 +189,7 @@ initial_window_height 32c
 EOF
   touch "$KITTY_DIR/Hyprland.conf"
 fi
-ok "Title bar, borders and 128x32 default size in Plasma; Omarchy unchanged"
+did "Title bar, borders and 128x32 default size in Plasma; Omarchy unchanged"
 
 # ---------- 5. kitty color theme ----------
 step "5/6 Kitty color theme"
@@ -199,7 +201,7 @@ else
   # Non-interactive: applies the theme to current-theme.conf and adds the
   # BEGIN/END_KITTY_THEME block to kitty.conf. Downloads the theme list on first use.
   if run kitten themes --reload-in=none "$KITTY_THEME" < /dev/null; then
-    ok "Applied \"$KITTY_THEME\" (both sessions; delete the BEGIN_KITTY_THEME block in kitty.conf to undo)"
+    did "Applied \"$KITTY_THEME\" (both sessions; delete the BEGIN_KITTY_THEME block in kitty.conf to undo)"
   else
     warn "Couldn't apply \"$KITTY_THEME\" (no network, or unknown name). Run 'kitten themes' later to pick one."
   fi
@@ -215,7 +217,7 @@ elif [[ -f "$BTOP_CONF" ]]; then
   else
     run cp "$BTOP_CONF" "$BTOP_CONF.bak"
     run sed -i 's/^color_theme = .*/color_theme = "TTY"/' "$BTOP_CONF"
-    ok "btop now follows the terminal's colors (backup: btop.conf.bak)"
+    did "btop now follows the terminal's colors (backup: btop.conf.bak)"
   fi
 else
   warn "No btop.conf yet. Run btop once, then re-run this script (or set Color theme to TTY in btop's options)."
@@ -230,5 +232,6 @@ cat <<'EOF'
   (Don't pick plain "Hyprland" or "Hyprland (uwsm)"; they skip Omarchy's setup.)
 
   Don't start Plasma from a text console while Hyprland is running; it will crash.
-  To undo everything: ./uninstall.sh
+  To undo everything:
+    curl -fsSL https://raw.githubusercontent.com/paulcfry67/omarchy-plasma/main/uninstall.sh | bash
 EOF

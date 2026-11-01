@@ -17,7 +17,7 @@ Omarchy stays exactly as it is. This adds Plasma next to it and fixes the rough 
 | Step | Change |
 |---|---|
 | Snapshot | Creates a btrfs snapshot named "before omarchy-plasma" with snapper |
-| Packages | Installs a lean Plasma set: `plasma-desktop konsole dolphin kscreen plasma-nm plasma-pa kde-gtk-config breeze breeze-gtk` (or `plasma-meta` with `--full`) |
+| Packages | Installs a lean Plasma set: `plasma-desktop konsole dolphin kscreen plasma-nm plasma-pa kde-gtk-config breeze breeze-gtk`, plus `kitty` (Omarchy's default terminal is foot). Use `--full` for `plasma-meta` instead |
 | Login screen | Adds `/etc/sddm.conf.d/zz-local.conf` to turn off auto-login and use the Breeze login theme, which has a session menu |
 | Kitty | Gives kitty a title bar, borders and a 128×32 default size **in Plasma only**, via a per-desktop include |
 | Kitty colors | Applies the "Adwaita Darker" kitty theme (configurable), because some Omarchy themes are near-monochrome |
@@ -71,7 +71,13 @@ Run `kitten themes` to browse kitty theme names.
 
 ```bash
 ./uninstall.sh                    # restore auto-login, remove kitty/btop changes
-./uninstall.sh --remove-packages  # also remove the Plasma packages
+./uninstall.sh --remove-packages  # also remove the Plasma packages (kitty is kept)
+```
+
+Or without cloning:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/paulcfry67/omarchy-plasma/main/uninstall.sh | bash
 ```
 
 The kitty color theme is left in place. Delete the `BEGIN_KITTY_THEME` block in `~/.config/kitty/kitty.conf` if you want kitty to follow Omarchy's themes again. Or roll back the whole machine to the "before omarchy-plasma" snapshot.

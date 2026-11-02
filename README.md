@@ -1,8 +1,8 @@
 # Plasma Option for Omarchy
 
-omarchy-plasma
+_omarchy-plasma_
 
-Adds a **KDE Plasma (Wayland)** session alongside [Omarchy](https://omarchy.org)'s Hyprland desktop, and choose between them at the login screen. Omarchy stays exactly as it is. This adds Plasma next to it and fixes the rough edges that show up when the two share one user account.
+Adds a [**KDE Plasma (Wayland)**](https://community.kde.org/Plasma/Wayland) session alongside [Omarchy](https://omarchy.org)'s Hyprland desktop, and choose between them at the login screen. Omarchy stays exactly as it is. This adds Plasma next to it and fixes the rough edges that show up when the two share one user account.
 
 I'm a long time Unix and Linux user here with two years of Arch Linux, btw. I am used to using the standard Windows key-bindings, and I admit that I just can't used to the tiling setup. So I always use the Plasma desktop which is easier for Windows users to slide into. This repo is just one way to get it working in Omarchy and get it working quickly.
 
@@ -87,6 +87,7 @@ The kitty color theme is left in place. Delete the `BEGIN_KITTY_THEME` block in 
 
 See [docs/manual-setup.md](docs/manual-setup.md) for the step-by-step manual version and the reasoning behind each change, and [CHANGELOG.md](CHANGELOG.md) for what changed in each version and the issues fixed along the way.
 
-
-pfry, 2026-11-02, Fix some sizing issues for virtual machines.
-pfry, 2026-11-01, Initial commit
+| Dev | Date | Desc |
+|:-|:-|:-|
+|pfry|2026-11-02|Fix some sizing issues for virtual machines|
+|pfry|2026-11-01|Initial commit|

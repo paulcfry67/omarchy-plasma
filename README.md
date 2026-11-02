@@ -2,19 +2,11 @@
 
 omarchy-plasma
 
-Add the option to use a Plasma desktop alongside Omarchy's native Hyprland tiling desktop.
+Adds a **KDE Plasma (Wayland)** session alongside [Omarchy](https://omarchy.org)'s Hyprland desktop, and choose between them at the login screen. Omarchy stays exactly as it is. This adds Plasma next to it and fixes the rough edges that show up when the two share one user account.
 
-pfry, 2026-11-01, Initial commit
+I'm a long time Unix and Linux user here with two years of Arch Linux, btw. I am used to using the standard Windows key-bindings, and I admit that I just can't used to the tiling setup. So I always use the Plasma desktop which is easier for Windows users to slide into. This repo is just one way to get it working in Omarchy and get it working quickly.
 
-
-Long time Unix and Linux user here with two years of Arch Linux, btw. I admit that I just can't used to the tiling setup. So I always use the Plasma desktop which is easier for Windows users to slide into. This repo is just one way to get it working in Omarchy and get it working quickly.
-
-No license for now, not really anything original to me here. Developed with help from Claude AI.
-
-
-Add a **KDE Plasma (Wayland)** session alongside [Omarchy](https://omarchy.org)'s Hyprland desktop, and choose between them at the login screen.
-
-Omarchy stays exactly as it is. This adds Plasma next to it and fixes the rough edges that show up when the two share one user account.
+There's not really anything original to me here. Developed and tested with help from Claude AI.
 
 ## What it does
 
@@ -94,3 +86,7 @@ The kitty color theme is left in place. Delete the `BEGIN_KITTY_THEME` block in 
 - Tested on Omarchy 4.0.6, Plasma 6.8 and kitty 0.49.
 
 See [docs/manual-setup.md](docs/manual-setup.md) for the step-by-step manual version and the reasoning behind each change, and [CHANGELOG.md](CHANGELOG.md) for what changed in each version and the issues fixed along the way.
+
+
+pfry, 2026-11-02, Fix some sizing issues for virtual machines.
+pfry, 2026-11-01, Initial commit

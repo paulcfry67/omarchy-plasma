@@ -7,7 +7,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Known issues
 
-- **Login screen too large in a VMware VM.** The SDDM login screen runs the bottom of its controls past the edge of the VM window. Omarchy runs the login screen on its own Hyprland compositor (`/etc/sddm.conf.d/10-wayland.conf`), which picks a resolution bigger than the VMware display. Logging in still works. Planned fix: run the login screen on KWin, which is installed along with Plasma.
+- **Copy and paste from the host doesn't reach Wayland apps in the Omarchy session (VMware).** With open-vm-tools, text copied on the host arrives on the guest's X11 (XWayland) clipboard, but Hyprland doesn't pass it on to native Wayland apps such as kitty, so pasting there fails. In the Plasma session it works, because KWin keeps the X11 and Wayland clipboards in sync. This is a Hyprland and open-vm-tools limitation rather than something this installer changes. Workaround in Omarchy: `xclip -o -selection clipboard | wl-copy`.
+
+## [1.2.0] - 2026-11-02
+
+### Fixed
+
+- **Login screen too large in a VMware VM.** Omarchy runs the SDDM login screen on its own Hyprland compositor (`/etc/sddm.conf.d/10-wayland.conf` and `/usr/share/sddm/hyprland.lua`). That config sets no monitor scale, so Hyprland picks one from the size the display reports. A real monitor reports its true size and gets 1x, but VMware's virtual display reports a misleading one, so Hyprland chose 2x and the login screen ran off the bottom of the window. A user's own Hyprland monitor setting doesn't reach the login screen, which runs separately. The installer now runs the login screen on KWin, which comes with Plasma, by adding a `[Wayland] CompositorCommand` line to `zz-local.conf`. Verified on Omarchy 4.0.6 in VMware Workstation. Removing `zz-local.conf` (as `uninstall.sh` does) restores Omarchy's login screen.
 
 ## [1.1.0] - 2026-11-01
 
@@ -41,6 +47,7 @@ These came up while setting up Plasma by hand alongside Omarchy 4.0.6. Each is n
 - `--help` failed when the script was piped from `curl`, because it read its own file for the help text.
 - A repeat install left `KDE.conf.bak` behind after uninstalling. `uninstall.sh` now removes it.
 
-[Unreleased]: https://github.com/paulcfry67/omarchy-plasma/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/paulcfry67/omarchy-plasma/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/paulcfry67/omarchy-plasma/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/paulcfry67/omarchy-plasma/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/paulcfry67/omarchy-plasma/releases/tag/v1.0.0

@@ -18,7 +18,7 @@ Omarchy stays exactly as it is. This adds Plasma next to it and fixes the rough 
 |---|---|
 | Snapshot | Creates a btrfs snapshot named "before omarchy-plasma" with snapper |
 | Packages | Installs a lean Plasma set: `plasma-desktop konsole dolphin kscreen plasma-nm plasma-pa kde-gtk-config breeze breeze-gtk`, plus `kitty` (Omarchy's default terminal is foot). Use `--full` for `plasma-meta` instead |
-| Login screen | Adds `/etc/sddm.conf.d/zz-local.conf` to turn off auto-login and use the Breeze login theme, which has a session menu |
+| Login screen | Adds `/etc/sddm.conf.d/zz-local.conf` to turn off auto-login, use the Breeze login theme (which has a session menu), and run the login screen on KWin so it scales correctly in virtual machines |
 | Kitty | Gives kitty a title bar, borders and a 128×32 default size **in Plasma only**, via a per-desktop include |
 | Kitty colors | Applies the "Adwaita Darker" kitty theme (configurable), because some Omarchy themes are near-monochrome |
 | btop | Switches btop to the `TTY` theme so it uses the terminal's colors |

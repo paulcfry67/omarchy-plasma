@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-VERSION="1.1.0"
+VERSION="1.2.0"
 
 # ---------- defaults ----------
 FULL=0
@@ -155,13 +155,24 @@ if [[ -d /usr/share/sddm/themes/breeze ]] || (( DRY_RUN )); then
 else
   warn "SDDM breeze theme not found; keeping Omarchy's login theme (it may hide the session menu)"
 fi
+# Run the login screen on KWin instead of Omarchy's Hyprland greeter. Hyprland
+# auto-scales from the monitor's reported size, and virtual displays (VMware)
+# report misleading sizes, so the greeter came up at 2x and ran off the screen.
+COMPOSITOR_LINES=""
+if command -v kwin_wayland >/dev/null || (( DRY_RUN )); then
+  COMPOSITOR_LINES=$'\n[Wayland]\nCompositorCommand=kwin_wayland --drm --no-lockscreen --no-global-shortcuts --locale1'
+else
+  warn "kwin_wayland not found; keeping Omarchy's Hyprland login screen"
+fi
 write_root_file "$SDDM_OVERRIDE" <<EOF
 # Added by omarchy-plasma. Remove this file to restore Omarchy's auto-login.
 [Autologin]
 User=
 ${THEME_LINES}
+${COMPOSITOR_LINES}
 EOF
 did "Auto-login off; pick Plasma (Wayland) or Omarchy at the login screen"
+if [[ -n "$COMPOSITOR_LINES" ]]; then did "Login screen runs on KWin (correct scaling in VMs)"; fi
 
 # ---------- 4. kitty decorations and size (Plasma only) ----------
 step "4/6 Kitty window settings for Plasma"

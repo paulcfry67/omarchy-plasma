@@ -64,6 +64,31 @@ for f in KDE.conf KDE.conf.bak Hyprland.conf; do
   if [[ -f "$KITTY_DIR/$f" ]]; then run rm -f "$KITTY_DIR/$f"; ok "Removed $f"; fi
 done
 
+echo "==> Desktop folder"
+USER_DIRS="${XDG_CONFIG_HOME:-$HOME/.config}/user-dirs.dirs"
+DESKTOP_MARKER="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy-plasma/desktop-was-home"
+if [[ -f "$DESKTOP_MARKER" ]]; then
+  # Only undo what the installer did: point the desktop back at the home folder.
+  if command -v xdg-user-dirs-update >/dev/null; then
+    run xdg-user-dirs-update --set DESKTOP "$HOME"
+  else
+    # shellcheck disable=SC2016  # user-dirs.dirs stores a literal $HOME
+    run sed -i 's|^XDG_DESKTOP_DIR=.*|XDG_DESKTOP_DIR="$HOME/"|' "$USER_DIRS"
+  fi
+  run rm -f "$DESKTOP_MARKER"
+  run rmdir --ignore-fail-on-non-empty "$(dirname "$DESKTOP_MARKER")"
+  ok "Desktop points at your home folder again"
+  # Remove ~/Desktop only if it's empty, so nothing you saved there is lost.
+  if [[ -d "$HOME/Desktop" ]] && [[ -z "$(ls -A "$HOME/Desktop")" ]]; then
+    run rmdir "$HOME/Desktop"
+    ok "Removed the empty ~/Desktop folder"
+  elif [[ -d "$HOME/Desktop" ]]; then
+    warn "Kept ~/Desktop because it has files in it"
+  fi
+else
+  ok "Desktop folder wasn't changed by the installer"
+fi
+
 echo "==> btop"
 if [[ -f "$BTOP_CONF" ]] && grep -q '^color_theme = "TTY"' "$BTOP_CONF"; then
   run sed -i 's/^color_theme = .*/color_theme = "current"/' "$BTOP_CONF"

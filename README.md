@@ -18,6 +18,7 @@ There's not really anything original to me here. Developed and tested with help 
 | Kitty | Gives kitty a title bar, borders and a 128×32 default size **in Plasma only**, via a per-desktop include |
 | Kitty colors | Applies the "Adwaita Darker" kitty theme (configurable), because some Omarchy themes are near-monochrome |
 | btop | Switches btop to the `TTY` theme so it uses the terminal's colors |
+| Desktop | Points Plasma's desktop at its own `~/Desktop` folder. Omarchy registers your home folder as the desktop, so Plasma otherwise shows every folder in it |
 
 Every step checks before changing anything, so it's safe to run more than once.
 
@@ -52,6 +53,7 @@ Don't pick plain "Hyprland" or "Hyprland (uwsm)", because those skip Omarchy's s
 --no-kitty-theme       Leave kitty following Omarchy's theme
 --no-btop              Don't change btop's theme
 --no-snapshot          Skip the btrfs snapshot
+--no-desktop-folder    Leave the desktop showing your home folder
 --dry-run              Show what would happen without changing anything
 ```
 

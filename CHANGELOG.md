@@ -9,6 +9,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - **Copy and paste from the host doesn't reach Wayland apps in the Omarchy session (VMware).** With open-vm-tools, text copied on the host arrives on the guest's X11 (XWayland) clipboard, but Hyprland doesn't pass it on to native Wayland apps such as kitty, so pasting there fails. In the Plasma session it works, because KWin keeps the X11 and Wayland clipboards in sync. This is a Hyprland and open-vm-tools limitation rather than something this installer changes. Workaround in Omarchy: `xclip -o -selection clipboard | wl-copy`.
 
+## [1.3.0] - 2026-11-02
+
+### Fixed
+
+- **Plasma's desktop showed every folder in the home folder.** Omarchy sets `XDG_DESKTOP_DIR="$HOME/"` in `~/.config/user-dirs.dirs`, because Hyprland has no desktop icons. Plasma's desktop displays whatever folder is registered as the Desktop, so Documents, Downloads, Projects and the rest appeared on it as real folders, not shortcuts. The installer now creates `~/Desktop` and registers it with `xdg-user-dirs-update`, so the desktop starts empty, as on Windows. It only does this when the desktop currently points at the home folder, and leaves a marker so `uninstall.sh` can point it back. The uninstaller removes `~/Desktop` only if it's empty. Skip this step with `--no-desktop-folder`. Takes effect immediately, without logging out.
+
 ## [1.2.0] - 2026-11-02
 
 ### Fixed
@@ -47,7 +53,8 @@ These came up while setting up Plasma by hand alongside Omarchy 4.0.6. Each is n
 - `--help` failed when the script was piped from `curl`, because it read its own file for the help text.
 - A repeat install left `KDE.conf.bak` behind after uninstalling. `uninstall.sh` now removes it.
 
-[Unreleased]: https://github.com/paulcfry67/omarchy-plasma/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/paulcfry67/omarchy-plasma/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/paulcfry67/omarchy-plasma/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/paulcfry67/omarchy-plasma/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/paulcfry67/omarchy-plasma/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/paulcfry67/omarchy-plasma/releases/tag/v1.0.0

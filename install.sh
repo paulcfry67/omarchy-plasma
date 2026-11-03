@@ -11,6 +11,7 @@
 #   --no-kitty-theme       Leave kitty's colors alone (keep following Omarchy's theme)
 #   --no-btop              Don't switch btop to the TTY color theme
 #   --no-snapshot          Skip the btrfs snapshot
+#   --no-desktop-folder    Leave the desktop showing your home folder
 #   --dry-run              Show what would be done without changing anything
 #   -h, --help             Show this help
 #
@@ -18,7 +19,7 @@
 
 set -euo pipefail
 
-VERSION="1.2.0"
+VERSION="1.3.0"
 
 # ---------- defaults ----------
 FULL=0
@@ -26,6 +27,7 @@ KITTY_THEME="Adwaita Darker"
 DO_KITTY_THEME=1
 DO_BTOP=1
 DO_SNAPSHOT=1
+DO_DESKTOP=1
 DRY_RUN=0
 
 LEAN_PKGS=(plasma-desktop konsole dolphin kscreen plasma-nm plasma-pa kde-gtk-config breeze breeze-gtk kitty)
@@ -72,7 +74,7 @@ write_root_file() {
 }
 
 usage() {
-  if [[ -f "$0" ]]; then sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'
+  if [[ -f "$0" ]]; then awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"
   else echo "See https://github.com/paulcfry67/omarchy-plasma#options"; fi
 }
 
@@ -88,6 +90,7 @@ while (( $# )); do
     --no-kitty-theme)  DO_KITTY_THEME=0 ;;
     --no-btop)         DO_BTOP=0 ;;
     --no-snapshot)     DO_SNAPSHOT=0 ;;
+    --no-desktop-folder) DO_DESKTOP=0 ;;
     --dry-run)         DRY_RUN=1 ;;
     -h|--help)         usage; exit 0 ;;
     *)                 die "Unknown option: $1 (try --help)" ;;
@@ -113,7 +116,7 @@ if (( ! DRY_RUN )); then
 fi
 
 # ---------- 1. snapshot ----------
-step "1/6 Snapshot"
+step "1/7 Snapshot"
 if (( ! DO_SNAPSHOT )); then
   warn "Skipped (--no-snapshot)"
 elif command -v snapper >/dev/null; then
@@ -127,7 +130,7 @@ else
 fi
 
 # ---------- 2. packages ----------
-step "2/6 Plasma packages"
+step "2/7 Plasma packages"
 if (( FULL )); then PKGS=("${FULL_PKGS[@]}"); else PKGS=("${LEAN_PKGS[@]}"); fi
 MISSING=()
 for p in "${PKGS[@]}"; do pacman -Qq "$p" &>/dev/null || MISSING+=("$p"); done
@@ -142,7 +145,7 @@ else
 fi
 
 # ---------- 3. SDDM session picker ----------
-step "3/6 Login screen session picker"
+step "3/7 Login screen session picker"
 if [[ ! -f /usr/share/wayland-sessions/plasma.desktop ]] && (( ! DRY_RUN )); then
   die "/usr/share/wayland-sessions/plasma.desktop is missing; the Plasma install didn't complete."
 fi
@@ -175,7 +178,7 @@ did "Auto-login off; pick Plasma (Wayland) or Omarchy at the login screen"
 if [[ -n "$COMPOSITOR_LINES" ]]; then did "Login screen runs on KWin (correct scaling in VMs)"; fi
 
 # ---------- 4. kitty decorations and size (Plasma only) ----------
-step "4/6 Kitty window settings for Plasma"
+step "4/7 Kitty window settings for Plasma"
 run mkdir -p "$KITTY_DIR"
 if [[ -f "$KITTY_DIR/kitty.conf" ]] && grep -qxF "$INCLUDE_LINE" "$KITTY_DIR/kitty.conf"; then
   ok "Per-desktop include already present"
@@ -203,7 +206,7 @@ fi
 did "Title bar, borders and 128x32 default size in Plasma; Omarchy unchanged"
 
 # ---------- 5. kitty color theme ----------
-step "5/6 Kitty color theme"
+step "5/7 Kitty color theme"
 if (( ! DO_KITTY_THEME )); then
   warn "Skipped (--no-kitty-theme)"
 elif ! command -v kitten >/dev/null; then
@@ -219,7 +222,7 @@ else
 fi
 
 # ---------- 6. btop ----------
-step "6/6 btop colors"
+step "6/7 btop colors"
 if (( ! DO_BTOP )); then
   warn "Skipped (--no-btop)"
 elif [[ -f "$BTOP_CONF" ]]; then
@@ -232,6 +235,30 @@ elif [[ -f "$BTOP_CONF" ]]; then
   fi
 else
   warn "No btop.conf yet. Run btop once, then re-run this script (or set Color theme to TTY in btop's options)."
+fi
+
+# ---------- 7. desktop folder ----------
+step "7/7 Desktop folder"
+# Omarchy registers the home folder itself as the XDG Desktop folder (Hyprland
+# shows no desktop icons), so Plasma's desktop displays every folder in $HOME.
+# Give the desktop its own ~/Desktop folder instead, like Windows does.
+USER_DIRS="${XDG_CONFIG_HOME:-$HOME/.config}/user-dirs.dirs"
+DESKTOP_MARKER="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy-plasma/desktop-was-home"
+# shellcheck disable=SC2016  # user-dirs.dirs stores a literal $HOME
+if (( ! DO_DESKTOP )); then
+  warn "Skipped (--no-desktop-folder)"
+elif [[ -f "$USER_DIRS" ]] && grep -qE '^XDG_DESKTOP_DIR="\$HOME/?"' "$USER_DIRS"; then
+  run mkdir -p "$HOME/Desktop" "$(dirname "$DESKTOP_MARKER")"
+  if command -v xdg-user-dirs-update >/dev/null; then
+    run xdg-user-dirs-update --set DESKTOP "$HOME/Desktop"
+  else
+    # shellcheck disable=SC2016  # user-dirs.dirs stores a literal $HOME
+    run sed -i 's|^XDG_DESKTOP_DIR=.*|XDG_DESKTOP_DIR="$HOME/Desktop"|' "$USER_DIRS"
+  fi
+  run touch "$DESKTOP_MARKER"
+  did "Desktop now uses its own ~/Desktop folder instead of showing your whole home folder"
+else
+  ok "Desktop folder already separate from your home folder"
 fi
 
 # ---------- done ----------
